@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Microsoft.EntityFrameworkCore;
 
 namespace BewerbungsTracker
 {
@@ -19,6 +20,31 @@ namespace BewerbungsTracker
         public MainWindow()
         {
             InitializeComponent();
+            LadeDaten();
+        }
+
+        public void LadeDaten()
+        {
+            using (var db = new BewerbungsContext())
+            {
+                db.Database.Migrate();
+                if (!db.Bewerbungen.Any())
+                {
+                    var testBewerbung = new Bewerbung
+                    {
+                        Firma = "Version AG",
+                        Position = "Softwareentwickler",
+                        Datum = DateTime.Now,
+                        Status = "Offen"
+                    };
+
+                    db.Bewerbungen.Add(testBewerbung);
+                    db.SaveChanges();
+                }
+
+                var alleBewerbungen = db.Bewerbungen.ToList();
+                BewerbungsTabelle.ItemsSource = alleBewerbungen;
+            }
         }
     }
 }
