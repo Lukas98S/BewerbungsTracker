@@ -5,6 +5,9 @@ using System.IO;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.Graphics.Operations;
+using MailKit.Net.Imap;
+using MailKit.Search;
+using MailKit;
 
 namespace BewerbungsTracker
 {
@@ -17,6 +20,10 @@ namespace BewerbungsTracker
         {
             InitializeComponent();
             LadeDaten();
+            Task.Run(() =>
+            {
+                PruefeMails();
+            });
         }
 
 
@@ -25,63 +32,69 @@ namespace BewerbungsTracker
             using (var db = new BewerbungsContext())
             {
                 db.Database.Migrate();
-                var alleBewerbungen = db.Bewerbungen.ToList();
+                var alleBewerbungen = db.Bewerbungen.Where(b => b.Status != "Abgelehnt").ToList();
                 BewerbungsTabelle.ItemsSource = alleBewerbungen;
             }
         }
 
         private void BtnImport_Click(object sender, RoutedEventArgs e)
         {
-            string ordnerPfad = @"C:\Users\Lukas\Desktop\Anschreiben";
-
-            if (!Directory.Exists(ordnerPfad))
+            var dialog = new Microsoft.Win32.OpenFolderDialog
             {
-                MessageBox.Show("Der Ordner wurde nicht gefunden.");
-            }
+                Title = "Wählen den Ordner mit deinen PDF-Anschreiben"
+            };
 
-            string[] pdfDateien = Directory.GetFiles(ordnerPfad, "*.pdf");
-
-            using (var db = new BewerbungsContext())
+            if (dialog.ShowDialog() == true)
             {
-                int newAdd = 0;
 
-                foreach (var dateiPfad in pdfDateien)
+                string ordnerPfad = dialog.FolderName;
+
+                string[] pdfDateien = Directory.GetFiles(ordnerPfad, "*.pdf");
+
+                using (var db = new BewerbungsContext())
                 {
-                    string dateiName = System.IO.Path.GetFileNameWithoutExtension(dateiPfad);
+                    int newAdd = 0;
 
-                    if (dateiName.StartsWith("Anschreiben-"))
+                    foreach (var dateiPfad in pdfDateien)
                     {
-                        string firma = dateiName.Replace("Anschreiben-", "").Trim();
+                        string dateiName = System.IO.Path.GetFileNameWithoutExtension(dateiPfad);
 
-                        if (!db.Bewerbungen.Any(b => b.Firma == firma))
+                        if (dateiName.StartsWith("Anschreiben-"))
                         {
-                            DateTime bewerbungsDatum = File.GetCreationTime(dateiPfad);
+                            string firma = dateiName.Replace("Anschreiben-", "").Trim();
 
-                            var neueBewerbung = new Bewerbung
+                            if (!db.Bewerbungen.Any(b => b.Firma == firma))
                             {
-                                Firma = firma,
-                                Position = ReadPosition(dateiPfad),
-                                Datum = bewerbungsDatum,
-                                Status = "Offen"
-                            };
+                                DateTime bewerbungsDatum = File.GetCreationTime(dateiPfad);
 
-                            db.Bewerbungen.Add(neueBewerbung);
-                            newAdd++;
+                                var neueBewerbung = new Bewerbung
+                                {
+                                    Firma = firma,
+                                    Position = ReadPosition(dateiPfad),
+                                    Datum = bewerbungsDatum,
+                                    Status = "Offen"
+                                };
+
+                                db.Bewerbungen.Add(neueBewerbung);
+                                newAdd++;
+                            }
                         }
                     }
-                }
-                if (newAdd > 0)
-                {
-                    db.SaveChanges();
-                    MessageBox.Show($"{newAdd} Neue Bewerbungen erfolgreich hinzugefügt");
-                    LadeDaten();
-                }
-                else
-                {
-                    MessageBox.Show("Keine neuen Bewerbungen gefunden.");
+                    if (newAdd > 0)
+                    {
+                        db.SaveChanges();
+                        MessageBox.Show($"{newAdd} Neue Bewerbungen erfolgreich hinzugefügt");
+                        LadeDaten();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Keine neuen Bewerbungen gefunden.");
+                    }
                 }
             }
         }
+        
+
 
         private void BtnManuell_Click(object sender, RoutedEventArgs e)
         {
@@ -166,6 +179,85 @@ namespace BewerbungsTracker
                 MessageBox.Show("Fehler beim Lesen der PDF-Datei.");
             }
             return "";
+        }
+
+        private void PruefeMails()
+        {
+            string imapServer = "imap.aol.com";
+            int port = 993;
+            string emailAdresse = "Lukasschuetz98@aol.com";
+            string passwort = "sewbkfqsgmgqskxv";
+
+            try
+            {
+                using (var client =  new ImapClient())
+                {
+                    client.Connect(imapServer, port, true);
+                    client.Authenticate(emailAdresse, passwort);
+
+                    var inbox = client.Inbox;
+                    inbox.Open(FolderAccess.ReadOnly);
+
+                    var query = SearchQuery.DeliveredAfter(DateTime.Now.AddDays(-14));
+                    var uids = inbox.Search(query);
+
+                    int absagen = 0;
+
+                    using ( var db = new BewerbungsContext())
+                    {
+                        var offene = db.Bewerbungen.Where(b => b.Status == "Offen").ToList();
+
+                        foreach (var uid in uids)
+                        {
+                           try { 
+                                var message = inbox.GetMessage(uid);
+                                string text = (message.TextBody ?? "") + " " + (message.HtmlBody ?? "");
+                                string betreff = message.Subject ?? "";
+                                string absender = message.From.ToString();
+
+                                string gesamtText = (betreff + " " + text + " " + absender).ToLower();
+
+                                if (gesamtText.Contains("leider") || gesamtText.Contains("absage") || gesamtText.Contains("andere kandidaten") || gesamtText.Contains("bedauern"))
+                                {
+                                    foreach (var bewerbung in offene.ToList())
+                                    {
+                                        string firmenName = (bewerbung.Firma ?? "").ToLower();
+                                        if (!string.IsNullOrWhiteSpace(firmenName) && gesamtText.Contains(firmenName))
+                                        {
+                                            bewerbung.Status = "Abgelehnt";
+                                            absagen++;
+                                            offene.Remove(bewerbung);
+                                            break;
+                                        }
+                                    }
+                                }
+                           }
+                            catch
+                            {
+                                continue;
+                            }
+                        }
+
+                        if (absagen > 0)
+                        {
+                            db.SaveChanges();
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                MessageBox.Show($"{absagen} neue Absage per E-Mail gefunden Startus wurde aktualisiert!");
+                                LadeDaten();
+                            });
+                        }
+                    }
+                    client.Disconnect(true);
+                }
+            }
+            catch (Exception ex)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    MessageBox.Show("E-Mails Prüfen ist fehlgeschlagen" + ex.Message);
+                });
+            }
         }
     }
 }
