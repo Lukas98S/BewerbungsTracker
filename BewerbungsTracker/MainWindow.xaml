@@ -5,45 +5,25 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BewerbungsTracker"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="" Height="450" Width="800"
+        Icon="Image/Logo.png">
+
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-        <WrapPanel Grid.Row="1" Margin="10" VerticalAlignment="Center">
+        <Border Grid.Column="0" Background="#21212E">
+            <StackPanel Margin="0,30,0,0">
+                <TextBlock Text="Bewerbungs-Tracker" Foreground="White" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,40"/>
+                <Button x:Name="BtnAktive" Content="Aktive Bewerbungen" Click="BtnAktive_Click"
+                        Height="45" Background="Transparent" Foreground="White" BorderThickness="0" FontSize="15" Margin="10,5"/>
+                <Button x:Name="BtnArchiv" Content="Archiv &amp; Absagen" Click="BtnArchiv_Click"
+                         Height="45" Background="Transparent" Foreground="White" BorderThickness="0" FontSize="15" Margin="10,5"/>
+            </StackPanel>
+        </Border>
 
-            <TextBlock Text="Firma:" VerticalAlignment="Center" Margin="0,0,5,5"/>
-            <TextBox x:Name="TxtFirma" Width="120" Margin="0,0,15,5" Padding="2"/>
-
-            <TextBlock Text="Position:" VerticalAlignment="Center" Margin="0,0,5,5"/>
-            <TextBox x:Name="TxtPosition" Width="120" Margin="0,0,15,5" Padding="2"/>
-
-            <Button Content="Manuell hinzufügen" Click="BtnManuell_Click" Padding="10,5" Margin="0,0,10,5"/>
-            <Button Content="Alles Löschen" Click="BtnDelete_Click" Padding="10,5" Margin="0,0,10,5"/>
-            <Button x:Name="BtnImport" Content="PDFs Import" Click="BtnImport_Click" Padding="10,5" Margin="0,0,0,5"/>
-
-            </WrapPanel>
-
-            <DataGrid x:Name="BewerbungsTabelle"
-                  AutoGenerateColumns="False"
-                  Margin="10"
-                  IsReadOnly="True"
-                  Grid.Row="0">
-
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto"/>
-                <DataGridTextColumn Header="Firma" Binding="{Binding Firma}" Width="*"/>
-                <DataGridTextColumn Header="Position" Binding="{Binding Position}" Width="*"/>
-                <DataGridTextColumn Header="Bewerbungsdatum"
-                                    Binding="{Binding Datum, StringFormat=\{0:dd.MM.yyyy\}}"
-                                    Width="Auto"/>
-
-                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="Auto"/>
-
-            </DataGrid.Columns>
-        </DataGrid>
-
+        <ContentControl x:Name="MainContent" Grid.Column="1" Background="#F5F5F5"/>
     </Grid>
 </Window>
