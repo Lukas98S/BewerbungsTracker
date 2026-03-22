@@ -199,7 +199,11 @@ namespace BewerbungsTracker
                     inbox.Open(FolderAccess.ReadOnly);
 
                     var query = SearchQuery.DeliveredAfter(DateTime.Now.AddDays(-14));
-                    var uids = inbox.Search(query);
+                    var wort = SearchQuery.MessageContains("leider").Or(SearchQuery.MessageContains("absage")).Or(SearchQuery.MessageContains("andere kandidaten")).Or(SearchQuery.MessageContains("bedauern"));
+
+                    var turbo = query.And(wort);
+
+                    var uids = inbox.Search(turbo);
 
                     int absagen = 0;
 
