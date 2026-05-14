@@ -6,6 +6,8 @@ using System.Windows;
 using System.Windows.Controls;
 using UglyToad.PdfPig;
 using MailKit.Net.Imap;
+using System.Text.Json;
+using System.Collections.Generic;
 
 
 namespace BewerbungsTracker
@@ -182,8 +184,18 @@ namespace BewerbungsTracker
         {
             string imapServer = "imap.aol.com";
             int port = 993;
-            string emailAdresse = "Lukasschuetz98@aol.com";
-            string passwort = "sewbkfqsgmgqskxv";
+
+                if (!File.Exists("secrets.json"))
+                {
+                MessageBox.Show("Die Datei 'secrets.json'fehlt");
+                return;
+                }
+
+                string jsonText = File.ReadAllText("secrets.json");
+                var config = JsonSerializer.Deserialize<Dictionary<string, string>>(jsonText);
+
+                string emailAdresse = config["Email"];
+            string passwort = config["Passwort"];
 
             try
             {
