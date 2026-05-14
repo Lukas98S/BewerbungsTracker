@@ -15,18 +15,19 @@
         <WrapPanel Grid.Row="1" Margin="10" VerticalAlignment="Center">
 
             <TextBlock Text="Firma:" VerticalAlignment="Center" Margin="0,0,5,5"/>
-            <TextBox x:Name="TxtFirma" Width="120" Margin="0,0,15,5" Padding="2"/>
+            <TextBox Text="{Binding NeueFirma, UpdateSourceTrigger=PropertyChanged}" Width="120" Margin="0,0,15,5" Padding="2"/>
 
             <TextBlock Text="Position:" VerticalAlignment="Center" Margin="0,0,5,5"/>
-            <TextBox x:Name="TxtPosition" Width="120" Margin="0,0,15,5" Padding="2"/>
+            <TextBox Text="{Binding NeuePosition, UpdateSourceTrigger=PropertyChanged}" Width="120" Margin="0,0,15,5" Padding="2"/>
 
-            <Button Content="Manuell hinzufügen" Click="BtnManuell_Click" Padding="10,5" Margin="0,0,10,5"/>
-            <Button Content="Alles Löschen" Click="BtnDelete_Click" Padding="10,5" Margin="0,0,10,5"/>
-            <Button x:Name="BtnImport" Content="PDFs Import" Click="BtnImport_Click" Padding="10,5" Margin="0,0,0,5"/>
+            <Button Content="Manuell hinzufügen" Command="{Binding HinzufuegenCommand}" Padding="10,5" Margin="0,0,10,5"/>
+            <Button Content="Alles Löschen" Command="{Binding AlleLoeschenCommand}" Padding="10,5" Margin="0,0,10,5"/>
+            <Button Content="PDFs Import" Command="{Binding PdfImportCommand}" Padding="10,5" Margin="0,0,0,5"/>
 
         </WrapPanel>
 
         <DataGrid x:Name="BewerbungsTabelle"
+              ItemsSource="{Binding Bewerbungen}"
               AutoGenerateColumns="False"
               Margin="10"
               IsReadOnly="True"
