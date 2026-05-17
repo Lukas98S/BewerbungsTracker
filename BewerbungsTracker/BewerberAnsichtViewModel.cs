@@ -17,6 +17,7 @@ namespace BewerbungsTracker
 
         private string _neueFirma;
         private string _neuePosition;
+        public List<string> StatusListe { get; } = new List<string> { "Offen", "Abgelehnt", "Zusage!" };
 
         public string NeueFirma
         {
@@ -44,13 +45,13 @@ namespace BewerbungsTracker
 
             LadeDatenAusDatenbank();
 
-            Task.Run(() => PruefeMails());
+            _ = PruefeMails();
         }
 
-        private void PruefeMails()
+        private async Task PruefeMails()
         {
             if (!File.Exists("secrets.json")) return;
-            var jsonText = File.ReadAllText("secrets.json");
+            var jsonText = await File.ReadAllTextAsync("secrets.json");
             var config = JsonSerializer.Deserialize<Dictionary<string, string>>(jsonText);
 
             string imapServer = "imap.aol.com";
@@ -62,26 +63,26 @@ namespace BewerbungsTracker
             {
                 using (var client = new ImapClient())
                 {
-                    client.Connect(imapServer, port, true);
-                    client.Authenticate(emailAdresse, passwort);
+                    await client.ConnectAsync(imapServer, port, true);
+                    await client.AuthenticateAsync(emailAdresse, passwort);
 
                     var inbox = client.Inbox;
-                    inbox.Open(FolderAccess.ReadOnly);
+                    await inbox.OpenAsync(FolderAccess.ReadOnly);
 
                     var query = SearchQuery.DeliveredAfter(DateTime.Now.AddDays(-14));
                     var wort = SearchQuery.MessageContains("leider").Or(SearchQuery.MessageContains("absage"))
                            .Or(SearchQuery.MessageContains("andere kanidaten")).Or(SearchQuery.MessageContains("bedauern"));
 
-                    var uids = inbox.Search(query.And(wort));
+                    var uids = await inbox.SearchAsync(query.And(wort));
                     int absagenGefunden = 0;
 
                     using (var db = new BewerbungsContext())
                     {
-                        var offene = db.Bewerbungen.Where(b => b.Status == "Offen").ToList();
+                        var offene = await db.Bewerbungen.Where(b => b.Status == "Offen").ToListAsync();
 
                         foreach (var uid in uids)
                         {
-                            var message = inbox.GetMessage(uid);
+                            var message = await inbox.GetMessageAsync(uid);
                             string gesamtText = (message.Subject + " " + (message.TextBody ?? "")+ " " + message.From).ToLower();
 
                             foreach (var bewerbung in offene)
@@ -97,21 +98,19 @@ namespace BewerbungsTracker
 
                         if (absagenGefunden > 0)
                         {
-                            db.SaveChanges();
-                            Application.Current.Dispatcher.Invoke(() =>
-                            {
-                                LadeDatenAusDatenbank();
-                                MessageBox.Show($"{absagenGefunden} neue Absagen per E-Mail gefunden !");
-                            });
+                            await db.SaveChangesAsync();
+                            LadeDatenAusDatenbank();
+                            MessageBox.Show($"{absagenGefunden} neue Absagen per E-Mail gefunden !");
+                            
                         }
                     }
-                    client.Disconnect(true);
+                    await client.DisconnectAsync(true);
                 }
                 
             }
             catch (Exception ex)
             {
-                Application.Current.Dispatcher.Invoke(() => MessageBox.Show("E-Mail-Check fehlgeschlagen: " + ex.Message));
+                MessageBox.Show("E-Mail-Check fehlgeschlagen: " + ex.Message);
             }
         }
 
@@ -123,6 +122,7 @@ namespace BewerbungsTracker
                 Bewerbungen.Clear();
                 foreach (var b in liste)
                 {
+                    b.PropertyChanged += Bewerbung_StatusGeandert;
                     Bewerbungen.Add(b);
                 }
             }
@@ -148,6 +148,7 @@ namespace BewerbungsTracker
 
                 db.Bewerbungen.Add(neueBewerbung);
                 db.SaveChanges();
+                neueBewerbung.PropertyChanged += Bewerbung_StatusGeandert;
                 Bewerbungen.Add(neueBewerbung);
             }
             NeueFirma = string.Empty;
@@ -156,6 +157,21 @@ namespace BewerbungsTracker
             MessageBox.Show("Erfolgreich hinzugefügt");
         }
 
+        private void Bewerbung_StatusGeandert(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "Status")
+            {
+                if(sender is Bewerbung geanderteBewerbung && geanderteBewerbung.Status == "Abgelehnt")
+                {
+                    using(var db = new BewerbungsContext())
+                    {
+                        db.Bewerbungen.Update(geanderteBewerbung);
+                        db.SaveChanges();
+                    }
+                    Application.Current.Dispatcher.InvokeAsync(() => Bewerbungen.Remove(geanderteBewerbung));
+                }
+            }
+        }
         private void AlleLoeschen()
         {
             var antwort = MessageBox.Show("Willst du alle Bewerbungen Löschen", "Achtung", MessageBoxButton.YesNo, MessageBoxImage.Warning);

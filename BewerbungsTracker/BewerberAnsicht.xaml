@@ -35,14 +35,21 @@
 
             <DataGrid.Columns>
                 <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto"/>
-                <DataGridTextColumn Header="Firma" Binding="{Binding Firma}" Width="*"/>
-                <DataGridTextColumn Header="Position" Binding="{Binding Position}" Width="*"/>
+                <DataGridTextColumn Header="Firma" Binding="{Binding Firma}" Width="*" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Position" Binding="{Binding Position}" Width="*" IsReadOnly="True"/>
                 <DataGridTextColumn Header="Bewerbungsdatum"
                                 Binding="{Binding Datum, StringFormat=\{0:dd.MM.yyyy\}}"
-                                Width="Auto"/>
+                                Width="Auto" IsReadOnly="True"/>
 
-                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="Auto"/>
-
+                <DataGridTemplateColumn Header="Status" Width="Auto">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ComboBox SelectedItem="{Binding Status, UpdateSourceTrigger=PropertyChanged}" 
+                          ItemsSource="{Binding DataContext.StatusListe, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                          Margin="2" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
 

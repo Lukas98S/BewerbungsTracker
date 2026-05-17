@@ -11,17 +11,7 @@ namespace BewerbungsTracker
         public MainWindow()
         {
             InitializeComponent();
-            MainContent.Content = new BewerberAnsicht();
-        }
-
-        private void BtnAktive_Click(object sender, RoutedEventArgs e)
-        {
-            MainContent.Content = new BewerberAnsicht();
-        }
-
-        private void BtnArchiv_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("Hier wird noch gebaut");
+            this.DataContext = new MainViewModel();
         }
     }
 }

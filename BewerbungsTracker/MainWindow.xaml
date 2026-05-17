@@ -8,6 +8,16 @@
         Title="" Height="450" Width="800"
         Icon="Image/Logo.png">
 
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type local:BewerberAnsichtViewModel}">
+            <local:BewerberAnsicht />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type local:ArchivAnsichtViewModel}">
+            <local:ArchivAnsicht />
+        </DataTemplate>
+    </Window.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="220"/>
@@ -17,13 +27,13 @@
         <Border Grid.Column="0" Background="#21212E">
             <StackPanel Margin="0,30,0,0">
                 <TextBlock Text="Bewerbungs-Tracker" Foreground="White" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,40"/>
-                <Button x:Name="BtnAktive" Content="Aktive Bewerbungen" Click="BtnAktive_Click"
+                <Button x:Name="BtnAktive" Content="Aktive Bewerbungen" Command="{Binding ZeigeAktiveCommand}"
                         Height="45" Background="Transparent" Foreground="White" BorderThickness="0" FontSize="15" Margin="10,5"/>
-                <Button x:Name="BtnArchiv" Content="Archiv &amp; Absagen" Click="BtnArchiv_Click"
+                <Button x:Name="BtnArchiv" Content="Archiv &amp; Absagen" Command="{Binding ZeigeArchivCommand}"
                          Height="45" Background="Transparent" Foreground="White" BorderThickness="0" FontSize="15" Margin="10,5"/>
             </StackPanel>
         </Border>
 
-        <ContentControl x:Name="MainContent" Grid.Column="1" Background="#F5F5F5"/>
+        <ContentControl Content="{Binding AktuelleAnsicht}" Grid.Column="1" Background="#F5F5F5"/>
     </Grid>
 </Window>
