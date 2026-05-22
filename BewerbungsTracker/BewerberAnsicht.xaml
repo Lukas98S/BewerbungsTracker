@@ -45,8 +45,19 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <ComboBox SelectedItem="{Binding Status, UpdateSourceTrigger=PropertyChanged}" 
-                          ItemsSource="{Binding DataContext.StatusListe, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                          Margin="2" />
+                            ItemsSource="{Binding DataContext.StatusListe, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                            Style="{StaticResource {x:Static ToolBar.ComboBoxStyleKey}}"
+                            BorderThickness="0"
+                            VerticalAlignment="Center"
+                            Margin="2">
+                                <ComboBox.ItemContainerStyle>
+                                    <Style TargetType="ComboBoxItem" >
+                                        <Setter Property="Background" Value="White"/>
+                                        <Setter Property="Foreground" Value="Black"/>
+
+                                    </Style>
+                                </ComboBox.ItemContainerStyle>
+                            </ComboBox>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

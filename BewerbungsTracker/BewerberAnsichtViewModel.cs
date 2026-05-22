@@ -54,8 +54,8 @@ namespace BewerbungsTracker
             var jsonText = await File.ReadAllTextAsync("secrets.json");
             var config = JsonSerializer.Deserialize<Dictionary<string, string>>(jsonText);
 
-            string imapServer = "imap.aol.com";
             int port = 993;
+            string imapServer = config["ImapServer"];
             string emailAdresse = config["Email"];
             string passwort = config["Passwort"];
 

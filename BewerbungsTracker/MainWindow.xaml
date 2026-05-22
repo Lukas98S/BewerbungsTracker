@@ -9,6 +9,11 @@
         Icon="Image/Logo.png">
 
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <DataTemplate DataType="{x:Type local:SetupViewModel}">
+            <local:Setup />
+        </DataTemplate>
+        
         <DataTemplate DataType="{x:Type local:BewerberAnsichtViewModel}">
             <local:BewerberAnsicht />
         </DataTemplate>
@@ -25,7 +30,7 @@
         </Grid.ColumnDefinitions>
 
         <Border Grid.Column="0" Background="#21212E">
-            <StackPanel Margin="0,30,0,0">
+            <StackPanel Margin="0,30,0,0" Visibility="{Binding MenuVisible, Converter={StaticResource BoolToVis}}">
                 <TextBlock Text="Bewerbungs-Tracker" Foreground="White" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,40"/>
                 <Button x:Name="BtnAktive" Content="Aktive Bewerbungen" Command="{Binding ZeigeAktiveCommand}"
                         Height="45" Background="Transparent" Foreground="White" BorderThickness="0" FontSize="15" Margin="10,5"/>
