@@ -16,7 +16,10 @@ namespace BewerbungsTracker
         /// Ermöglicht CRUD-Operationen auf Bewerbungsdatensätze.
         /// </summary>
         public DbSet<Bewerbung> Bewerbungen { get; set; }
-
+        public BewerbungsContext()
+        {
+            Database.EnsureCreated();
+        }
         /// <summary>
         /// Konfiguriert die Datenbankverbindung beim Initialisieren des DbContext.
         /// Nutzt SQLite mit der lokalen Datenbankdatei "meine_bewerbungen.db".
