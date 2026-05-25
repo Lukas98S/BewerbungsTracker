@@ -57,7 +57,7 @@ namespace BewerbungsTracker
             int port = 993;
             string imapServer = config["ImapServer"];
             string emailAdresse = config["Email"];
-            string passwort = config["Passwort"];
+            string passwort = Krypto.HashDe(config["Passwort"]);
 
             try
             {

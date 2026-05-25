@@ -97,7 +97,7 @@ namespace BewerbungsTracker
             var config = new Dictionary<string, string>
             {
              {"Email", Email.Trim()},
-             {"Passwort", Passwort.Trim()},
+             {"Passwort",Krypto.HashEn(Passwort.Trim())},
              {"ImapServer", ImapServer.Trim()}
             };
             string jsonText = JsonSerializer.Serialize(config);
