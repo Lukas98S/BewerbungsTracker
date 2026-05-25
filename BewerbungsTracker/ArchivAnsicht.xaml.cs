@@ -14,10 +14,16 @@ using System.Windows.Shapes;
 namespace BewerbungsTracker
 {
     /// <summary>
-    /// Interaktionslogik für ArchivAnsicht.xaml
+    /// Code-Behind für die ArchivAnsicht (UserControl).
+    /// Zeigt abgelehnte Bewerbungen (Archiv) an.
+    /// Das ViewModel wird vom XAML-Designer automatisch initialisiert.
     /// </summary>
     public partial class ArchivAnsicht : UserControl
     {
+        /// <summary>
+        /// Initialisiert das ArchivAnsicht-UserControl.
+        /// Anmerkung: Das DataContext wird üblicherweise im XAML definiert, nicht im Code-Behind.
+        /// </summary>
         public ArchivAnsicht()
         {
             InitializeComponent();
