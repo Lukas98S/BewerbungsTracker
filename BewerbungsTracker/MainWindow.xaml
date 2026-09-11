@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:BewerbungsTracker"
         mc:Ignorable="d"
         Title="" Height="450" Width="800"
-        Icon="Image/Logo.png">
+        Icon="Image/icon.ico">
 
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
