@@ -65,15 +65,13 @@ namespace BewerbungsTracker
             ZeigeAktiveCommand = new RelayCommand(() => AktuelleAnsicht = new BewerberAnsichtViewModel());
             ZeigeArchivCommand = new RelayCommand(() => AktuelleAnsicht = new ArchivAnsichtViewModel());
 
-            // Standard-Ansicht wird gesetzt
-            AktuelleAnsicht = new BewerberAnsichtViewModel();
 
             // Prüfung: Wenn secrets.json vorhanden ist, war die App bereits konfiguriert
-            if (System.IO.File.Exists("secrets.json"))
+            if (System.IO.File.Exists(AppPfade.SecretsDatei))
             {
                 // Menü ist sichtbar, wenn die App konfiguriert wurde
                 MenuVisible = true;
-                AktuelleAnsicht = new BewerberAnsichtViewModel();
+                AktuelleAnsicht = new BewerberAnsichtViewModel(true);
             }
             else
             {
@@ -85,7 +83,7 @@ namespace BewerbungsTracker
 
                 // SetupSuccess-Callback wird definiert: Nach erfolgreichem Setup wird das Menü sichtbar gemacht
                 // und zur Bewerber-Ansicht gewechselt
-                setupVm.SetupSuccess = () => { MenuVisible = true; AktuelleAnsicht = new BewerberAnsichtViewModel(); };
+                setupVm.SetupSuccess = () => { MenuVisible = true; AktuelleAnsicht = new BewerberAnsichtViewModel(true); };
 
                 // Setup-Ansicht wird angezeigt
                 AktuelleAnsicht = setupVm;

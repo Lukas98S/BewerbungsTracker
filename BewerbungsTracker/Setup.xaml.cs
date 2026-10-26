@@ -18,5 +18,13 @@ namespace BewerbungsTracker
         {
             InitializeComponent();
         }
+        
+        public void PasswortBox_PasswordChange(object sender, RoutedEventArgs e)
+        {
+            if(this.DataContext is SetupViewModel vm)
+            {
+                vm.Passwort = PasswortBox.Password;
+            }
+        }
     }
 }

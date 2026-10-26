@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.ComponentModel;
@@ -132,7 +132,7 @@ namespace BewerbungsTracker
                     break;
 
                 case "t-online.de":
-                    ImapServer = "secureimap.t-oonline.de";
+                    ImapServer = "secureimap.t-online.de";
                     break;
 
                 case "icloud.com":
@@ -165,7 +165,7 @@ namespace BewerbungsTracker
             string jsonText = JsonSerializer.Serialize(config);
 
             // JSON wird in secrets.json gespeichert
-            File.WriteAllText("secrets.json", jsonText);
+            File.WriteAllText(AppPfade.SecretsDatei, jsonText);
 
             // SetupSuccess-Callback wird aufgerufen, um die Anwendung fortzusetzen
             SetupSuccess?.Invoke();

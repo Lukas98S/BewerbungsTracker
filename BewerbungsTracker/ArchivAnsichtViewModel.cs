@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System.ComponentModel;
 using System.Collections.ObjectModel;
-using System.Linq;
+using System.Windows;
 
 namespace BewerbungsTracker
 {
@@ -19,6 +18,7 @@ namespace BewerbungsTracker
         /// </summary>
         public ObservableCollection<Bewerbung> AbgelehnteBewerbungen { get; set; }
 
+        public List<string> StatusListe { get; } = new List<string> { "Offen", "Abgelehnt", "Vorstellungsgespräch", "Zusage!" };
         /// <summary>
         /// Initialisiert das ArchivAnsichtViewModel und lädt alle abgelehnten Bewerbungen aus der Datenbank.
         /// </summary>
@@ -42,10 +42,26 @@ namespace BewerbungsTracker
                 // Jede abgelehnte Bewerbung wird zur Collection hinzugefügt
                 foreach (var b in absagen)
                 {
+                    b.PropertyChanged += Bewerbung_StatusGeandert;
                     AbgelehnteBewerbungen.Add(b);
                 }
             }
         }
 
+        private void Bewerbung_StatusGeandert(object? sender, PropertyChangedEventArgs e)
+        {
+            if(e.PropertyName == "Status" && sender is Bewerbung geanderteBewerbung)
+            {
+                using (var db = new BewerbungsContext())
+                {
+                    db.Bewerbungen.Update(geanderteBewerbung);
+                    db.SaveChanges();
+                }
+                if(geanderteBewerbung.Status != "Abgelehnt")
+                {
+                    Application.Current.Dispatcher.InvokeAsync(() => AbgelehnteBewerbungen.Remove(geanderteBewerbung));
+                }
+            }
+        }
     }
 }

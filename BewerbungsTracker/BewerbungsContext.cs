@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +28,23 @@ namespace BewerbungsTracker
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             // Verbindung zur SQLite-Datenbank wird konfiguriert
-            optionsBuilder.UseSqlite("Data Source=meine_bewerbungen.db");
+            optionsBuilder.UseSqlite($"Data Source={AppPfade.DatenbankDatei}");
         }
+    }
+
+    public static class  AppPfade
+    {
+        public static string Ordner
+        {
+            get
+            {
+                string pfad = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "BewerbungsTracker");
+                Directory.CreateDirectory(pfad); // Erstellt den Ordner, falls er nicht existiert
+                return pfad;
+            }
+        }
+
+        public static string SecretsDatei => Path.Combine(Ordner, "secrets.json");
+        public static string DatenbankDatei => Path.Combine(Ordner, "meine_bewerbungen.db");
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
@@ -36,7 +36,7 @@ namespace BewerbungsTracker
         /// Liste der möglichen Status für eine Bewerbung.
         /// Wird in der UI als Dropdown angeboten.
         /// </summary>
-        public List<string> StatusListe { get; } = new List<string> { "Offen", "Abgelehnt", "Zusage!" };
+        public List<string> StatusListe { get; } = new List<string> { "Offen", "Abgelehnt","Vorstellungsgespräch", "Zusage!" };
 
         /// <summary>
         /// Die neue Firma für manuelle Bewerbungseingabe.
@@ -81,7 +81,7 @@ namespace BewerbungsTracker
         /// Initialisiert das BewerberAnsichtViewModel.
         /// Lädt Bewerbungen aus der Datenbank und startet die automatische E-Mail-Überprüfung.
         /// </summary>
-        public BewerberAnsichtViewModel()
+        public BewerberAnsichtViewModel(bool mailsPruefen = false)
         {
             // ObservableCollection wird initialisiert
             Bewerbungen = new ObservableCollection<Bewerbung>();
@@ -95,7 +95,11 @@ namespace BewerbungsTracker
             LadeDatenAusDatenbank();
 
             // Asynchrone Überprüfung von neuen Absagen-E-Mails wird gestartet
-            _ = PruefeMails();
+            if (mailsPruefen) 
+            { 
+                _ = PruefeMails();
+            }
+            
         }
 
         /// <summary>
@@ -107,10 +111,10 @@ namespace BewerbungsTracker
         private async Task PruefeMails()
         {
             // Wenn secrets.json nicht existiert, wurde die App nicht konfiguriert
-            if (!File.Exists("secrets.json")) return;
+            if (!File.Exists(AppPfade.SecretsDatei)) return;
 
             // Konfiguration wird aus secrets.json gelesen
-            var jsonText = await File.ReadAllTextAsync("secrets.json");
+            var jsonText = await File.ReadAllTextAsync(AppPfade.SecretsDatei);
             var config = JsonSerializer.Deserialize<Dictionary<string, string>>(jsonText);
 
             // IMAP-Verbindungsparameter werden aus der Konfiguration ausgelesen
@@ -138,7 +142,7 @@ namespace BewerbungsTracker
 
                     // Suche nach E-Mails mit Absage-Schlüsselwörtern
                     var wort = SearchQuery.MessageContains("leider").Or(SearchQuery.MessageContains("absage"))
-                           .Or(SearchQuery.MessageContains("andere kanidaten")).Or(SearchQuery.MessageContains("bedauern"));
+                           .Or(SearchQuery.MessageContains("andere kandidaten")).Or(SearchQuery.MessageContains("bedauern"));
 
                     // Suche wird kombiniert: E-Mails der letzten 14 Tage UND mit Absage-Schlüsselwörtern
                     var uids = await inbox.SearchAsync(query.And(wort));
@@ -154,13 +158,13 @@ namespace BewerbungsTracker
                         {
                             var message = await inbox.GetMessageAsync(uid);
                             // Text aus Betreff, Body und Absender wird kombiniert
-                            string gesamtText = (message.Subject + " " + (message.TextBody ?? "")+ " " + message.From).ToLower();
+                            string gesamtText = (message.Subject + " " + (message.TextBody ?? message.HtmlBody ?? "") + " " + message.From).ToLower();
 
                             // Überprüfung ob die E-Mail zu einer offenen Bewerbung passt
                             foreach (var bewerbung in offene)
                             {
                                 // Wenn der Firmenname in der E-Mail vorkommt, wird die Bewerbung als abgelehnt markiert
-                                if (gesamtText.Contains(bewerbung.Firma.ToLower()))
+                                if (bewerbung.Status != "Abgelehnt" && !string.IsNullOrEmpty(bewerbung.Firma) && gesamtText.Contains(bewerbung.Firma.ToLower()))
                                 {
                                     bewerbung.Status = "Abgelehnt";
                                     absagenGefunden++;
@@ -265,18 +269,18 @@ namespace BewerbungsTracker
         private void Bewerbung_StatusGeandert(object sender, PropertyChangedEventArgs e)
         {
             // Nur wenn die Status-Property sich ändert, wird diese Methode relevant
-            if (e.PropertyName == "Status")
+            if (e.PropertyName == "Status" && sender is Bewerbung geanderteBewerbung)
             {
-                // Wenn die Bewerbung auf "Abgelehnt" gesetzt wird, wird sie archiviert
-                if(sender is Bewerbung geanderteBewerbung && geanderteBewerbung.Status == "Abgelehnt")
+                // Jede Statusänderung (auch "Vorstellungsgespräch" oder "Zusage!") wird in der Datenbank gespeichert
+                using (var db = new BewerbungsContext())
                 {
-                    // Die Änderung wird in der Datenbank gespeichert
-                    using(var db = new BewerbungsContext())
-                    {
-                        db.Bewerbungen.Update(geanderteBewerbung);
-                        db.SaveChanges();
-                    }
+                    db.Bewerbungen.Update(geanderteBewerbung);
+                    db.SaveChanges();
+                }
 
+                // Wenn die Bewerbung auf "Abgelehnt" gesetzt wird, wird sie aus der aktiven Anzeige ins Archiv verschoben
+                if (geanderteBewerbung.Status == "Abgelehnt")
+                {
                     // Die Bewerbung wird aus der Anzeige entfernt (wird per Dispatcher aufgerufen, da es in Event stattfindet)
                     Application.Current.Dispatcher.InvokeAsync(() => Bewerbungen.Remove(geanderteBewerbung));
                 }
@@ -356,7 +360,7 @@ namespace BewerbungsTracker
                             if (!db.Bewerbungen.Any(b => b.Firma == firma))
                             {
                                 // Das Erstellungsdatum der PDF-Datei wird als Bewerbungsdatum verwendet
-                                DateTime bewerbungsDatum = File.GetCreationTime(dateiPfad);
+                                DateTime bewerbungsDatum = File.GetLastWriteTime(dateiPfad);
 
                                 // Neue Bewerbung wird erstellt
                                 var neueBewerbung = new Bewerbung
@@ -369,6 +373,7 @@ namespace BewerbungsTracker
                                 };
 
                                 db.Bewerbungen.Add(neueBewerbung);
+                                neueBewerbung.PropertyChanged += Bewerbung_StatusGeandert;
                                 Bewerbungen.Add(neueBewerbung);
                                 newAdd++;
                             }
@@ -378,6 +383,7 @@ namespace BewerbungsTracker
                     if (newAdd > 0)
                     {
                         db.SaveChanges();
+                        LadeDatenAusDatenbank();
                         MessageBox.Show($"{newAdd} Neue Bewerbungen erfolgreich hinzugefügt");
                     }
                     else

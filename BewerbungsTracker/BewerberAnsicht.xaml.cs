@@ -16,8 +16,6 @@ namespace BewerbungsTracker
         public BewerberAnsicht()
         {
             InitializeComponent();
-            // BewerberAnsichtViewModel wird als DataContext gesetzt
-            this.DataContext = new BewerberAnsichtViewModel();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
@@ -10,7 +10,7 @@ namespace BewerbungsTracker
     /// Repräsentiert eine einzelne Bewerbung mit Informationen zu Firma, Position und Status.
     /// Implementiert INotifyPropertyChanged, um UI-Binding bei Statusänderungen zu unterstützen.
     /// </summary>
-    public class Bewerbung
+    public class Bewerbung : INotifyPropertyChanged
     {
         /// <summary>
         /// Eindeutige Identifikation der Bewerbung in der Datenbank.
@@ -50,7 +50,7 @@ namespace BewerbungsTracker
             {
                 // Nur wenn sich der Wert tatsächlich ändert, wird das Event ausgelöst
                 // Dies verhindert unnötige UI-Updates
-                if(_status != value)
+                if(!string.IsNullOrEmpty(value) && _status != value)
                 {
                     _status = value;
                     // PropertyChanged-Event wird ausgelöst, damit die UI über die Änderung benachrichtigt wird

@@ -17,7 +17,26 @@
                 <DataGridTextColumn Header="Firma" Binding="{Binding Firma}" Width="*"/>
                 <DataGridTextColumn Header="Position" Binding="{Binding Position}" Width="*"/>
                 <DataGridTextColumn Header="Datum" Binding="{Binding Datum, StringFormat=\{0:dd.MM.yyyy\}}" Width="*"/>
-                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="Auto"/>
+                <DataGridTemplateColumn Header="Status" Width="Auto">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ComboBox SelectedItem="{Binding Status, UpdateSourceTrigger=PropertyChanged}" 
+                                       ItemsSource="{Binding DataContext.StatusListe, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                       Style="{StaticResource {x:Static ToolBar.ComboBoxStyleKey}}"
+                                       BorderThickness="0"
+                                       VerticalAlignment="Center"
+                                       Margin="2">     
+                                <ComboBox.ItemContainerStyle>
+                                    <Style TargetType="ComboBoxItem" >
+                                        <Setter Property="Background" Value="White"/>
+                                        <Setter Property="Foreground" Value="Black"/>
+
+                                    </Style>
+                                </ComboBox.ItemContainerStyle>
+                            </ComboBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>
