@@ -56,6 +56,14 @@ namespace BewerbungsTracker
             set { _neuePosition = value; OnPropertyChanged(nameof(NeuePosition)); }
         }
 
+        private Bewerbung? _ausgewaehlteBewerbung;
+        public Bewerbung? AusgewaehlteBewerbung
+        {
+            get => _ausgewaehlteBewerbung;
+            set { _ausgewaehlteBewerbung = value; OnPropertyChanged(nameof(AusgewaehlteBewerbung)); }
+        }
+
+        public ICommand EinzelnLoeschenCommand { get; }
         /// <summary>
         /// Command zum manuellen Hinzufügen einer Bewerbung.
         /// </summary>
@@ -90,6 +98,7 @@ namespace BewerbungsTracker
             HinzufuegenCommand = new RelayCommand(ManuellHinzufuegen);
             PdfImportCommand = new RelayCommand(PdfImport);
             AlleLoeschenCommand = new RelayCommand(AlleLoeschen);
+            EinzelnLoeschenCommand = new RelayCommand(EinzelnLoeschen);
 
             // Vorhandene Bewerbungen werden aus der Datenbank geladen
             LadeDatenAusDatenbank();
@@ -313,6 +322,24 @@ namespace BewerbungsTracker
             }
         }
 
+
+        private void EinzelnLoeschen()
+        {
+           if(AusgewaehlteBewerbung == null)
+            {
+                MessageBox.Show("Bitte zuerst eine Bewerbung in der Tabelle anklicken");
+                return;
+            }
+
+            using (var db = new BewerbungsContext())
+            {
+                db.Bewerbungen.Remove(AusgewaehlteBewerbung);
+                db.SaveChanges();
+
+                db.Database.ExecuteSqlRaw("UPDATE sqlite_sequence SET seq =(SELECT IFNULL(MAX(Id), 0) FROM Bewerbungen) WHERE name='Bewerbungen';");
+            }
+            Bewerbungen.Remove(AusgewaehlteBewerbung);
+        }
         /// <summary>
         /// Importiert Bewerbungen aus PDF-Anschreiben aus einem Ordner.
         /// Erkennt PDF-Dateien mit Namen "Anschreiben-[Firmenname].pdf" und extrahiert

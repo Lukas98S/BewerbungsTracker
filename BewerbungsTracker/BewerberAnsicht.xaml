@@ -20,14 +20,16 @@
             <TextBlock Text="Position:" VerticalAlignment="Center" Margin="0,0,5,5"/>
             <TextBox Text="{Binding NeuePosition, UpdateSourceTrigger=PropertyChanged}" Width="120" Margin="0,0,15,5" Padding="2"/>
 
-            <Button Content="Manuell hinzufügen" Command="{Binding HinzufuegenCommand}" Padding="10,5" Margin="0,0,10,5"/>
+            <Button Content="Hinzufügen" Command="{Binding HinzufuegenCommand}" Padding="10,5" Margin="0,0,10,5"/>
             <Button Content="Alles Löschen" Command="{Binding AlleLoeschenCommand}" Padding="10,5" Margin="0,0,10,5"/>
+            <Button Content="Auswahl Löschen" Command="{Binding EinzelnLoeschenCommand}" Padding="10,5" Margin="0,0,10,5"/>
             <Button Content="PDFs Import" Command="{Binding PdfImportCommand}" Padding="10,5" Margin="0,0,0,5"/>
 
         </WrapPanel>
 
         <DataGrid x:Name="BewerbungsTabelle"
               ItemsSource="{Binding Bewerbungen}"
+              SelectedItem="{Binding AusgewaehlteBewerbung}"
               AutoGenerateColumns="False"
               Margin="10"
               IsReadOnly="True"

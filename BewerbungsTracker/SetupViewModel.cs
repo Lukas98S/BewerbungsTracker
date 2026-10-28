@@ -4,6 +4,7 @@ using System.IO;
 using System.ComponentModel;
 using System.Text.Json;
 using System.Windows.Input;
+using System.Windows;
 
 namespace BewerbungsTracker
 {
@@ -150,7 +151,11 @@ namespace BewerbungsTracker
         private void Save()
         {
             // Validierung: Alle Felder müssen gefüllt sein
-            if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Passwort) || string.IsNullOrWhiteSpace(ImapServer)) return;
+            if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Passwort) || string.IsNullOrWhiteSpace(ImapServer)) 
+            {
+                MessageBox.Show("Bitte füllen Sie alle Felder aus.");
+                return;
+            }
 
             // Dictionary mit den Konfigurationswerten wird erstellt
             var config = new Dictionary<string, string>

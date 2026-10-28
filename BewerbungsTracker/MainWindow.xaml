@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BewerbungsTracker"
         mc:Ignorable="d"
-        Title="" Height="450" Width="800"
+        Title="Bewerbungs-Tracker" Height="450" Width="800"
         Icon="Image/icon.ico">
 
     <Window.Resources>
@@ -36,6 +36,7 @@
                         Height="45" Background="Transparent" Foreground="White" BorderThickness="0" FontSize="15" Margin="10,5"/>
                 <Button x:Name="BtnArchiv" Content="Archiv &amp; Absagen" Command="{Binding ZeigeArchivCommand}"
                          Height="45" Background="Transparent" Foreground="White" BorderThickness="0" FontSize="15" Margin="10,5"/>
+                <Button x:Name="BtnSetup" Content="Einstellungen" Command="{Binding ZeigeSetupCommand}" Height="45" Background="Transparent" Foreground="White" BorderThickness="0" FontSize="15" Margin="10,5"/>
             </StackPanel>
         </Border>
 

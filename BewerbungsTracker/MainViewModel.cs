@@ -54,6 +54,8 @@ namespace BewerbungsTracker
         /// </summary>
         public ICommand ZeigeArchivCommand { get; }
 
+        public ICommand ZeigeSetupCommand { get; }
+
         /// <summary>
         /// Initialisiert das MainViewModel und konfiguriert die Navigation.
         /// Prüft, ob die Anwendung bereits konfiguriert wurde (secrets.json existiert).
@@ -64,7 +66,7 @@ namespace BewerbungsTracker
             // Initialisiert die Commands für die Navigation zwischen Ansichten
             ZeigeAktiveCommand = new RelayCommand(() => AktuelleAnsicht = new BewerberAnsichtViewModel());
             ZeigeArchivCommand = new RelayCommand(() => AktuelleAnsicht = new ArchivAnsichtViewModel());
-
+            ZeigeSetupCommand = new RelayCommand(() => { var setupVm = new SetupViewModel(); setupVm.SetupSuccess = () => { MenuVisible = true; AktuelleAnsicht = new BewerberAnsichtViewModel(true); }; AktuelleAnsicht = setupVm; });
 
             // Prüfung: Wenn secrets.json vorhanden ist, war die App bereits konfiguriert
             if (System.IO.File.Exists(AppPfade.SecretsDatei))
