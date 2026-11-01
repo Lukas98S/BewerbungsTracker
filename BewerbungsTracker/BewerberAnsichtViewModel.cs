@@ -63,6 +63,15 @@ namespace BewerbungsTracker
             set { _ausgewaehlteBewerbung = value; OnPropertyChanged(nameof(AusgewaehlteBewerbung)); }
         }
 
+        private bool _istAmPruefen;
+        private string _statusText;
+        public string StatusText
+        {
+            get => _statusText;
+            set { _statusText = value; OnPropertyChanged(nameof(StatusText)); }
+        }
+
+        public ICommand MailsPruefenCommand { get; }
         public ICommand EinzelnLoeschenCommand { get; }
         /// <summary>
         /// Command zum manuellen Hinzufügen einer Bewerbung.
@@ -99,6 +108,7 @@ namespace BewerbungsTracker
             PdfImportCommand = new RelayCommand(PdfImport);
             AlleLoeschenCommand = new RelayCommand(AlleLoeschen);
             EinzelnLoeschenCommand = new RelayCommand(EinzelnLoeschen);
+            MailsPruefenCommand = new RelayCommand(async() => await PruefeMails());
 
             // Vorhandene Bewerbungen werden aus der Datenbank geladen
             LadeDatenAusDatenbank();
@@ -121,6 +131,9 @@ namespace BewerbungsTracker
         {
             // Wenn secrets.json nicht existiert, wurde die App nicht konfiguriert
             if (!File.Exists(AppPfade.SecretsDatei)) return;
+            if (_istAmPruefen) return;
+            _istAmPruefen = true;
+            StatusText = "\u23F3 Prüfe E-Mails";
 
             // Konfiguration wird aus secrets.json gelesen
             var jsonText = await File.ReadAllTextAsync(AppPfade.SecretsDatei);
@@ -190,6 +203,10 @@ namespace BewerbungsTracker
                             MessageBox.Show($"{absagenGefunden} neue Absagen per E-Mail gefunden !");
 
                         }
+                        else
+                        {
+                            StatusText = $"E-Mails geprüft ({DateTime.Now:HH:mm}Uhr) - keine neuen Absagen";
+                        }
                     }
                     await client.DisconnectAsync(true);
                 }
@@ -197,7 +214,12 @@ namespace BewerbungsTracker
             }
             catch (Exception ex)
             {
+                StatusText = $"\u274C E-Mail-Check fehlgeschlagen";
                 MessageBox.Show("E-Mail-Check fehlgeschlagen: " + ex.Message);
+            }
+            finally
+            {
+                _istAmPruefen = false;
             }
         }
 

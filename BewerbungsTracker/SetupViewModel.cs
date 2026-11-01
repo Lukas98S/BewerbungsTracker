@@ -180,7 +180,7 @@ namespace BewerbungsTracker
         /// Event, das ausgelöst wird, wenn sich eine Property ändert.
         /// Wird für WPF Data Binding verwendet, um die UI automatisch zu aktualisieren.
         /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// Löst das PropertyChanged-Event aus und benachrichtigt die UI über Änderungen.

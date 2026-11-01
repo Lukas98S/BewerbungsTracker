@@ -5,10 +5,11 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:BewerbungsTracker"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="700" d:DesignWidth="930">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
@@ -24,9 +25,10 @@
             <Button Content="Alles Löschen" Command="{Binding AlleLoeschenCommand}" Padding="10,5" Margin="0,0,10,5"/>
             <Button Content="Auswahl Löschen" Command="{Binding EinzelnLoeschenCommand}" Padding="10,5" Margin="0,0,10,5"/>
             <Button Content="PDFs Import" Command="{Binding PdfImportCommand}" Padding="10,5" Margin="0,0,0,5"/>
+            <Button Content="E-Mails Prüfen" Command="{Binding MailsPruefenCommand}" Padding="10,5" Margin="10,0,0,5"/>
 
         </WrapPanel>
-
+        <TextBlock Grid.Row="2" Text="{Binding StatusText}" Margin="12,0,10,8" Foreground="#555555" FontStyle="Italic"/>
         <DataGrid x:Name="BewerbungsTabelle"
               ItemsSource="{Binding Bewerbungen}"
               SelectedItem="{Binding AusgewaehlteBewerbung}"

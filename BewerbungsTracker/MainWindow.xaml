@@ -5,7 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BewerbungsTracker"
         mc:Ignorable="d"
-        Title="Bewerbungs-Tracker" Height="450" Width="800"
+        Title="Bewerbungs-Tracker" Height="700" Width="1150"
+        MinHeight="500" MinWidth="900"
+        WindowStartupLocation="CenterScreen"
         Icon="Image/icon.ico">
 
     <Window.Resources>
