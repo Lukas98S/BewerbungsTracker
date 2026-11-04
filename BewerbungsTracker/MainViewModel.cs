@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.ComponentModel;
 using System.Windows.Input;
+using System.Reflection;
 
 namespace BewerbungsTracker
 {
@@ -98,6 +99,16 @@ namespace BewerbungsTracker
         /// </summary>
         public event PropertyChangedEventHandler? PropertyChanged;
 
+
+        public string Version
+        {
+            get
+            {
+                var infoVersion = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+                string cleanVersion = infoVersion?.Split('+')[0].Replace("-", " ") ?? "Unbekannt";
+                return $"v{cleanVersion}";
+            }
+        }
         /// <summary>
         /// Löst das PropertyChanged-Event aus und benachrichtigt die UI über Änderungen.
         /// </summary>

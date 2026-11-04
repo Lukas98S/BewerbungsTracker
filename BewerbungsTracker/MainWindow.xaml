@@ -43,5 +43,6 @@
         </Border>
 
         <ContentControl Content="{Binding AktuelleAnsicht}" Grid.Column="1" Background="#F5F5F5"/>
+        <TextBlock Grid.Column="1" Text="{Binding Version}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10,8,15,5" Foreground="#888888" FontSize="10"/>
     </Grid>
 </Window>
