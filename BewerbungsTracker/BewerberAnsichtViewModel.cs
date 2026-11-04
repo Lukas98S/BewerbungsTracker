@@ -375,16 +375,18 @@ namespace BewerbungsTracker
         private void PdfImport()
         {
             // Dialog zur Auswahl eines Ordners wird angezeigt
-            var dialog = new Microsoft.Win32.OpenFolderDialog
+            var dialog = new Microsoft.Win32.OpenFileDialog
             {
-                Title = "Wählen den Ordner mit deinen PDF-Anschreiben"
+                Title = "Wählen den Ordner mit deinen PDF-Anschreiben",
+                Filter = "PDF-Dateien (*.pdf)|*.pdf",
+                Multiselect = true
             };
 
             if (dialog.ShowDialog() == true)
             {
 
                 // Der ausgewählte Ordner wird geholt
-                string ordnerPfad = dialog.FolderName;
+                string ordnerPfad = dialog.FileName;
 
                 // Alle PDF-Dateien im Ordner werden aufgelistet
                 string[] pdfDateien = Directory.GetFiles(ordnerPfad, "*.pdf");
